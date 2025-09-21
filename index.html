@@ -2,12 +2,23 @@
 <html lang="ja">
 <head>
   <meta charset="UTF-8">
-  <title>料理データベース検索</title>
+  <title>料理データベース</title>
   <style>
     body { font-family: Arial, sans-serif; margin: 20px; }
-    input { padding: 8px; margin: 5px; width: 200px; }
-    .recipe { border: 1px solid #ddd; border-radius: 8px; padding: 10px; margin: 10px 0; }
-    img { max-width: 200px; display: block; margin-top: 10px; }
+    input { padding: 8px; margin: 5px; width: 250px; }
+    .recipe { 
+      border: 1px solid #ddd; 
+      border-radius: 8px; 
+      padding: 10px; 
+      margin: 10px 0; 
+      background: #fafafa;
+    }
+    img { 
+      max-width: 250px; 
+      display: block; 
+      margin-top: 10px; 
+      border-radius: 6px;
+    }
   </style>
 </head>
 <body>
@@ -18,11 +29,17 @@
   <script>
     let recipes = [];
 
+    // JSONファイルを読み込み
     async function loadData() {
-      const response = await fetch('recipes.json'); // 同じリポジトリに置いたJSONを読み込む
-      recipes = await response.json();
+      try {
+        const response = await fetch('recipes.json');
+        recipes = await response.json();
+      } catch (e) {
+        console.error("JSONの読み込みに失敗しました:", e);
+      }
     }
 
+    // 検索処理
     function searchRecipes() {
       const keyword = document.getElementById('searchBox').value.trim();
       const resultsDiv = document.getElementById('results');
@@ -45,7 +62,9 @@
           <h3>${r["料理名(活用方法)"]}</h3>
           <p><b>食材:</b> ${r["使用したシネコ生産物"]}</p>
           <p><b>作成日:</b> ${new Date(r["作成日"]).toLocaleDateString()}</p>
-          ${r["写真のリンク"] ? `<img src="${r["写真のリンク"]}" alt="写真">` : ""}
+          ${r["写真のリンク"] 
+            ? `<img src="${r["写真のリンク"]}" alt="写真" onerror="this.onerror=null;this.replaceWith(document.createTextNode('画像が見つかりません'));">`
+            : ""}
         `;
         resultsDiv.appendChild(div);
       });
