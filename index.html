@@ -4,17 +4,17 @@
   <meta charset="UTF-8">
   <title>レシピ検索</title>
   <style>
-    body { font-family: sans-serif; padding: 20px; }
+    body { font-family: sans-serif; padding: 20px; max-width: 800px; margin: auto; }
     h1 { color: #333; }
-    input { padding: 8px; width: 250px; margin-bottom: 15px; }
+    input { padding: 8px; width: 300px; margin-bottom: 20px; }
     ul { list-style: none; padding: 0; }
-    li { background: #f9f9f9; margin: 10px 0; padding: 10px; border-radius: 8px; }
-    img { max-width: 200px; display: block; margin-top: 8px; }
+    li { background: #f9f9f9; margin: 12px 0; padding: 12px; border-radius: 8px; }
+    img { max-width: 250px; display: block; margin-top: 8px; border-radius: 6px; }
   </style>
 </head>
 <body>
   <h1>レシピ検索</h1>
-  <input type="text" id="searchBox" placeholder="食材で検索してください...">
+  <input type="text" id="searchBox" placeholder="食材や料理名で検索してください...">
   <ul id="results"></ul>
 
   <script>
@@ -28,21 +28,26 @@
         // 入力に応じて検索
         searchBox.addEventListener("input", () => {
           const keyword = searchBox.value.toLowerCase();
+
           const filtered = data.filter(item =>
             item["使用したシネコ生産物"].toLowerCase().includes(keyword) ||
             item["料理名(活用方法)"].toLowerCase().includes(keyword)
           );
 
-          // 検索結果を表示
-          results.innerHTML = filtered.map(item => `
-            <li>
-              <h3>${item["料理名(活用方法)"]}</h3>
-              <p><b>食材:</b> ${item["使用したシネコ生産物"]}</p>
-              ${item["写真のリンク"] 
-                ? `<img src="${item["写真のリンク"]}" alt="${item["料理名(活用方法)"]}">`
-                : ""}
-            </li>
-          `).join("");
+          // 結果を描画
+          results.innerHTML = filtered.map(item => {
+            // ファイル名を「YYYYMMDD_料理名.jpg」で組み立てる
+            const imageFileName = `${item["作成日"].replace(/-/g, "").slice(0,8)}_${item["料理名(活用方法)"]}.jpg`;
+            const imagePath = `images/${imageFileName}`;
+
+            return `
+              <li>
+                <h3>${item["料理名(活用方法)"]}</h3>
+                <p><b>食材:</b> ${item["使用したシネコ生産物"]}</p>
+                <img src="${imagePath}" alt="${item["料理名(活用方法)"]}">
+              </li>
+            `;
+          }).join("");
         });
       });
   </script>
