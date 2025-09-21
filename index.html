@@ -35,21 +35,18 @@
           );
 
           // 結果を描画
-          results.innerHTML = filtered.map(item => {
-            // ファイル名を「YYYYMMDD_料理名.jpg」で組み立てる
-            const imageFileName = `${item["作成日"].replace(/-/g, "").slice(0,8)}_${item["料理名(活用方法)"]}.jpg`;
-            const imagePath = `images/${imageFileName}`;
-
-            return `
-              <li>
-                <h3>${item["料理名(活用方法)"]}</h3>
-                <p><b>食材:</b> ${item["使用したシネコ生産物"]}</p>
-                <img src="${imagePath}" alt="${item["料理名(活用方法)"]}">
-              </li>
-            `;
-          }).join("");
+          results.innerHTML = filtered.map(item => `
+            <li>
+              <h3>${item["料理名(活用方法)"]}</h3>
+              <p><b>食材:</b> ${item["使用したシネコ生産物"]}</p>
+              ${item["写真のリンク"] 
+                ? `<img src="${item["写真のリンク"]}" alt="${item["料理名(活用方法)"]}">`
+                : "<p><i>画像なし</i></p>"}
+            </li>
+          `).join("");
         });
       });
   </script>
 </body>
 </html>
+
