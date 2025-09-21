@@ -33,13 +33,13 @@
           );
 
           results.innerHTML = filtered.map(item => {
-            // ✅ 作成日を日本時間に補正して日付文字列を生成
+            // ✅ Safari対応: UTCタイムスタンプに9時間を直接加算
             const dateObj = new Date(item["作成日"]);
-            dateObj.setHours(dateObj.getHours() + 9); // UTC→JST補正
+            const jst = new Date(dateObj.getTime() + (9 * 60 * 60 * 1000)); // JST補正
 
-            const yyyy = dateObj.getFullYear();
-            const mm = String(dateObj.getMonth() + 1).padStart(2, "0");
-            const dd = String(dateObj.getDate()).padStart(2, "0");
+            const yyyy = jst.getFullYear();
+            const mm = String(jst.getMonth() + 1).padStart(2, "0");
+            const dd = String(jst.getDate()).padStart(2, "0");
             const dateStr = `${yyyy}${mm}${dd}`;
 
             // ✅ ファイル名用に料理名を調整（スペース→アンダースコア）
