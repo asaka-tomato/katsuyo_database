@@ -33,24 +33,11 @@
           );
 
           results.innerHTML = filtered.map(item => {
-            // ✅ Safari対応: UTCタイムスタンプに9時間を直接加算
-            const dateObj = new Date(item["作成日"]);
-            const jst = new Date(dateObj.getTime() + (9 * 60 * 60 * 1000)); // JST補正
-
-            const yyyy = jst.getFullYear();
-            const mm = String(jst.getMonth() + 1).padStart(2, "0");
-            const dd = String(jst.getDate()).padStart(2, "0");
-            const dateStr = `${yyyy}${mm}${dd}`;
-
-            // ✅ ファイル名用に料理名を調整（スペース→アンダースコア）
-            let recipeName = item["料理名(活用方法)"];
-            recipeName = recipeName.replace(/\s+/g, "_");
-
-            const fileName = `${dateStr}_${recipeName}.jpg`;
+            // 作成日を "2022-06-10" → "20220610" に変換
+            const dateStr = item["作成日"].replace(/-/g, "");
+            // ファイル名を組み立て
+            const fileName = `${dateStr}_${item["料理名(活用方法)"]}.jpg`;
             const imagePath = `images_compressed/${fileName}`;
-
-            // デバッグ用: 実際に生成されたファイル名を出力
-            console.log("生成されたファイル名:", fileName);
 
             return `
               <li>
