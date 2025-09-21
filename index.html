@@ -18,7 +18,7 @@
   <ul id="results"></ul>
 
   <script>
-    fetch("recipes.json")
+    fetch("recipes_with_images.json")
       .then(response => response.json())
       .then(data => {
         const searchBox = document.getElementById("searchBox");
@@ -33,11 +33,7 @@
           );
 
           results.innerHTML = filtered.map(item => {
-            // 作成日を "2022-06-10" → "20220610" に変換
-            const dateStr = item["作成日"].replace(/-/g, "");
-            // ファイル名を組み立て
-            const fileName = `${dateStr}_${item["料理名(活用方法)"]}.jpg`;
-            const imagePath = `images_compressed/${fileName}`;
+            const imagePath = item["写真"]; // ✅ JSONのフィールドをそのまま利用
 
             return `
               <li>
