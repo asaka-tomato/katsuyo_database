@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <title>レシピ検索</title>
+  <style>
+    body { font-family: sans-serif; padding: 20px; }
+    h1 { color: #333; }
+    input { padding: 8px; width: 250px; margin-bottom: 15px; }
+    ul { list-style: none; padding: 0; }
+    li { background: #f9f9f9; margin: 10px 0; padding: 10px; border-radius: 8px; }
+    img { max-width: 200px; display: block; margin-top: 8px; }
+  </style>
+</head>
+<body>
+  <h1>レシピ検索</h1>
+  <input type="text" id="searchBox" placeholder="食材で検索してください...">
+  <ul id="results"></ul>
+
+  <script>
+    // recipes.json を読み込む
+    fetch("recipes.json")
+      .then(response => response.json())
+      .then(data => {
+        const searchBox = document.getElementById("searchBox");
+        const results = document.getElementById("results");
+
+        // 入力に応じて検索
+        searchBox.addEventListener("input", () => {
+          const keyword = searchBox.value.toLowerCase();
+          const filtered = data.filter(item =>
+            item["使用したシネコ生産物"].toLowerCase().includes(keyword) ||
+            item["料理名(活用方法)"].toLowerCase().includes(keyword)
+          );
+
+          // 検索結果を表示
+          results.innerHTML = filtered.map(item => `
+            <li>
+              <h3>${item["料理名(活用方法)"]}</h3>
+              <p><b>食材:</b> ${item["使用したシネコ生産物"]}</p>
+              ${item["写真のリンク"] 
+                ? `<img src="${item["写真のリンク"]}" alt="${item["料理名(活用方法)"]}">`
+                : ""}
+            </li>
+          `).join("");
+        });
+      });
+  </script>
+</body>
+</html>
