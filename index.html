@@ -2,50 +2,58 @@
 <html lang="ja">
 <head>
   <meta charset="UTF-8">
-  <title>レシピ検索</title>
+  <title>料理データベース検索</title>
   <style>
-    body { font-family: sans-serif; padding: 20px; max-width: 800px; margin: auto; }
-    h1 { color: #333; }
-    input { padding: 8px; width: 300px; margin-bottom: 20px; }
-    ul { list-style: none; padding: 0; }
-    li { background: #f9f9f9; margin: 12px 0; padding: 12px; border-radius: 8px; }
-    img { max-width: 250px; display: block; margin-top: 8px; border-radius: 6px; }
+    body { font-family: Arial, sans-serif; margin: 20px; }
+    input { padding: 8px; margin: 5px; width: 200px; }
+    .recipe { border: 1px solid #ddd; border-radius: 8px; padding: 10px; margin: 10px 0; }
+    img { max-width: 200px; display: block; margin-top: 10px; }
   </style>
 </head>
 <body>
-  <h1>レシピ検索</h1>
-  <input type="text" id="searchBox" placeholder="食材や料理名で検索してください...">
-  <ul id="results"></ul>
+  <h1>料理データベース</h1>
+  <input type="text" id="searchBox" placeholder="料理名または食材で検索...">
+  <div id="results"></div>
 
   <script>
-    fetch("recipes_with_images.json")
-      .then(response => response.json())
-      .then(data => {
-        const searchBox = document.getElementById("searchBox");
-        const results = document.getElementById("results");
+    let recipes = [];
 
-        searchBox.addEventListener("input", () => {
-          const keyword = searchBox.value.toLowerCase();
+    async function loadData() {
+      const response = await fetch('recipes.json'); // 同じリポジトリに置いたJSONを読み込む
+      recipes = await response.json();
+    }
 
-          const filtered = data.filter(item =>
-            item["使用したシネコ生産物"].toLowerCase().includes(keyword) ||
-            item["料理名(活用方法)"].toLowerCase().includes(keyword)
-          );
+    function searchRecipes() {
+      const keyword = document.getElementById('searchBox').value.trim();
+      const resultsDiv = document.getElementById('results');
+      resultsDiv.innerHTML = '';
 
-          results.innerHTML = filtered.map(item => {
-            const imagePath = item["写真"]; // ✅ JSONのフィールドをそのまま利用
+      const filtered = recipes.filter(r =>
+        r["料理名(活用方法)"].includes(keyword) ||
+        r["使用したシネコ生産物"].includes(keyword)
+      );
 
-            return `
-              <li>
-                <h3>${item["料理名(活用方法)"]}</h3>
-                <p><b>食材:</b> ${item["使用したシネコ生産物"]}</p>
-                <img src="${imagePath}" alt="${item["料理名(活用方法)"]}" 
-                     onerror="this.style.display='none'">
-              </li>
-            `;
-          }).join("");
-        });
+      if (filtered.length === 0) {
+        resultsDiv.innerHTML = '<p>該当するレシピが見つかりません。</p>';
+        return;
+      }
+
+      filtered.forEach(r => {
+        const div = document.createElement('div');
+        div.className = 'recipe';
+        div.innerHTML = `
+          <h3>${r["料理名(活用方法)"]}</h3>
+          <p><b>食材:</b> ${r["使用したシネコ生産物"]}</p>
+          <p><b>作成日:</b> ${new Date(r["作成日"]).toLocaleDateString()}</p>
+          ${r["写真のリンク"] ? `<img src="${r["写真のリンク"]}" alt="写真">` : ""}
+        `;
+        resultsDiv.appendChild(div);
       });
+    }
+
+    document.getElementById('searchBox').addEventListener('input', searchRecipes);
+
+    loadData();
   </script>
 </body>
 </html>
