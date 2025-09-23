@@ -56,42 +56,43 @@
     }
 
     function searchRecipes() {
-      const keyword = document.getElementById('searchBox').value.trim();
-      const resultsDiv = document.getElementById('results');
-      resultsDiv.innerHTML = '';
+  const keyword = document.getElementById('searchBox').value.trim().toLowerCase();
+  const keywords = keyword.split(/\s+/); // スペースで複数ワードに分割
+  const resultsDiv = document.getElementById('results');
+  resultsDiv.innerHTML = '';
 
-      const filtered = recipes.filter(r =>
-        r["料理名(活用方法)"].includes(keyword) ||
-        r["使用したシネコ生産物"].includes(keyword)
-      );
+  const filtered = recipes.filter(r => {
+    const text = (r["料理名(活用方法)"] + r["使用したシネコ生産物"]).toLowerCase();
+    return keywords.every(k => text.includes(k)); // 全てのキーワードを含む場合だけ
+  });
 
-      if (filtered.length === 0) {
-        resultsDiv.innerHTML = '<p>該当するレシピが見つかりません。</p>';
-        return;
+  if (filtered.length === 0) {
+    resultsDiv.innerHTML = '<p>該当するレシピが見つかりません。</p>';
+    return;
+  }
+
+  filtered.forEach(r => {
+    const div = document.createElement('div');
+    div.className = 'recipe';
+
+    let imagesHtml = "";
+    ["写真1", "写真2", "写真3"].forEach(key => {
+      if (r[key]) {
+        imagesHtml += `<img src="${r[key]}" alt="${r["料理名(活用方法)"]}" 
+          onerror="this.onerror=null;this.remove();">`;
       }
+    });
 
-      filtered.forEach(r => {
-        const div = document.createElement('div');
-        div.className = 'recipe';
+    div.innerHTML = `
+      <h3>${r["料理名(活用方法)"]}</h3>
+      <p><b>食材:</b> ${r["使用したシネコ生産物"]}</p>
+      <p><b>作成日:</b> ${new Date(r["作成日"]).toLocaleDateString()}</p>
+      ${imagesHtml}
+    `;
+    resultsDiv.appendChild(div);
+  });
+}
 
-        // 写真がある場合だけ出力
-        let imagesHtml = "";
-        ["写真1", "写真2", "写真3"].forEach(key => {
-          if (r[key]) {
-            imagesHtml += `<img src="${r[key]}" alt="${r["料理名(活用方法)"]}" 
-              onerror="this.onerror=null;this.remove();">`;
-          }
-        });
-
-        div.innerHTML = `
-          <h3>${r["料理名(活用方法)"]}</h3>
-          <p><b>食材:</b> ${r["使用したシネコ生産物"]}</p>
-          <p><b>作成日:</b> ${new Date(r["作成日"]).toLocaleDateString()}</p>
-          ${imagesHtml}
-        `;
-        resultsDiv.appendChild(div);
-      });
-    }
 
     document.getElementById('searchBox').addEventListener('input', searchRecipes);
 
