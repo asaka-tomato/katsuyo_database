@@ -62,8 +62,8 @@
           <h3>${r["料理名(活用方法)"]}</h3>
           <p><b>食材:</b> ${r["使用したシネコ生産物"]}</p>
           <p><b>作成日:</b> ${new Date(r["作成日"]).toLocaleDateString()}</p>
-          ${r["写真"] 
-            ? `<img src="${r["写真"]}" alt="写真" onerror="this.onerror=null;this.replaceWith(document.createTextNode('画像が見つかりません'));">`
+          ${r["github用"] 
+            ? `<img src="${r["github用"]}" alt="github用" onerror="this.onerror=null;this.replaceWith(document.createTextNode('画像が見つかりません'));">`
             : ""}
         `;
         resultsDiv.appendChild(div);
