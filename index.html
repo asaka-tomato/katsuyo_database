@@ -2,16 +2,19 @@
 <html lang="ja">
 <head>
   <meta charset="UTF-8">
-  <title>Synecoculture活用データベース</title>
+  <title>料理データベース</title>
   <style>
     body { font-family: Arial, sans-serif; margin: 20px; background: #f8f8f8; }
-    input { padding: 8px; margin: 5px 0 20px; width: 300px; }
+    h1 { margin-bottom: 10px; }
+    input { padding: 8px; margin: 5px 0; }
+    button { margin-top: 10px; padding: 6px 10px; cursor: pointer; }
 
     /* グリッドレイアウト */
     #results {
       display: grid;
       grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
       gap: 20px;
+      margin-top: 20px;
     }
 
     /* レシピカード */
@@ -43,8 +46,17 @@
   </style>
 </head>
 <body>
-  <h1>Synecoculture活用データベース</h1>
-  <input type="text" id="searchBox" placeholder="料理名または食材で検索...">
+  <h1>料理データベース</h1>
+
+  <!-- 検索フォーム -->
+  <div id="searchArea">
+    <input type="text" id="searchName" placeholder="料理名で検索">
+    <div id="ingredientInputs">
+      <input type="text" class="ingredient" placeholder="食材1">
+    </div>
+    <button id="addIngredient">＋ 食材を追加</button>
+  </div>
+
   <div id="results"></div>
 
   <script>
@@ -55,46 +67,72 @@
       recipes = await response.json();
     }
 
+    // 検索処理
     function searchRecipes() {
-  const keyword = document.getElementById('searchBox').value.trim().toLowerCase();
-  const keywords = keyword.split(/\s+/); // スペースで複数ワードに分割
-  const resultsDiv = document.getElementById('results');
-  resultsDiv.innerHTML = '';
+      const nameKeyword = document.getElementById('searchName').value.trim().toLowerCase();
+      const ingredients = Array.from(document.querySelectorAll('.ingredient'))
+        .map(input => input.value.trim().toLowerCase())
+        .filter(k => k); // 空欄は除外
 
-  const filtered = recipes.filter(r => {
-    const text = (r["料理名(活用方法)"] + r["使用したシネコ生産物"]).toLowerCase();
-    return keywords.every(k => text.includes(k)); // 全てのキーワードを含む場合だけ
-  });
+      const resultsDiv = document.getElementById('results');
+      resultsDiv.innerHTML = '';
 
-  if (filtered.length === 0) {
-    resultsDiv.innerHTML = '<p>該当するレシピが見つかりません。</p>';
-    return;
-  }
+      const filtered = recipes.filter(r => {
+        const nameText = r["料理名(活用方法)"].toLowerCase();
+        const ingredientText = r["使用したシネコ生産物"].toLowerCase();
 
-  filtered.forEach(r => {
-    const div = document.createElement('div');
-    div.className = 'recipe';
+        // 料理名が一致するか（空なら無条件OK）
+        const nameMatch = !nameKeyword || nameText.includes(nameKeyword);
 
-    let imagesHtml = "";
-    ["写真1", "写真2", "写真3"].forEach(key => {
-      if (r[key]) {
-        imagesHtml += `<img src="${r[key]}" alt="${r["料理名(活用方法)"]}" 
-          onerror="this.onerror=null;this.remove();">`;
+        // 食材はAND検索（すべて含む場合のみOK）
+        const ingredientMatch = ingredients.every(k => ingredientText.includes(k));
+
+        return nameMatch && ingredientMatch;
+      });
+
+      if (filtered.length === 0) {
+        resultsDiv.innerHTML = '<p>該当するレシピが見つかりません。</p>';
+        return;
       }
+
+      filtered.forEach(r => {
+        const div = document.createElement('div');
+        div.className = 'recipe';
+
+        let imagesHtml = "";
+        ["写真1", "写真2", "写真3"].forEach(key => {
+          if (r[key]) {
+            imagesHtml += `<img src="${r[key]}" alt="${r["料理名(活用方法)"]}" 
+              onerror="this.onerror=null;this.remove();">`;
+          }
+        });
+
+        div.innerHTML = `
+          <h3>${r["料理名(活用方法)"]}</h3>
+          <p><b>食材:</b> ${r["使用したシネコ生産物"]}</p>
+          <p><b>作成日:</b> ${new Date(r["作成日"]).toLocaleDateString()}</p>
+          ${imagesHtml}
+        `;
+        resultsDiv.appendChild(div);
+      });
+    }
+
+    // 入力のたびに検索
+    document.getElementById('searchArea').addEventListener('input', searchRecipes);
+
+    // ＋ボタンで食材入力欄を追加
+    document.getElementById('addIngredient').addEventListener('click', () => {
+      const container = document.getElementById('ingredientInputs');
+      const count = container.querySelectorAll('.ingredient').length + 1;
+      const newInput = document.createElement('input');
+      newInput.type = "text";
+      newInput.className = "ingredient";
+      newInput.placeholder = `食材${count}`;
+      container.appendChild(newInput);
+
+      // 新しい入力欄も検索イベントに対応
+      newInput.addEventListener('input', searchRecipes);
     });
-
-    div.innerHTML = `
-      <h3>${r["料理名(活用方法)"]}</h3>
-      <p><b>食材:</b> ${r["使用したシネコ生産物"]}</p>
-      <p><b>作成日:</b> ${new Date(r["作成日"]).toLocaleDateString()}</p>
-      ${imagesHtml}
-    `;
-    resultsDiv.appendChild(div);
-  });
-}
-
-
-    document.getElementById('searchBox').addEventListener('input', searchRecipes);
 
     loadData();
   </script>
