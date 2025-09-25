@@ -8,6 +8,17 @@
     h1 { margin-bottom: 10px; }
     input { padding: 8px; margin: 5px 0; }
     button { margin-top: 10px; padding: 6px 10px; cursor: pointer; }
+    .recipe .note {
+      font-size: 13px;
+      color: #666;
+      font-style: italic;
+      margin-top: 8px;
+      padding: 6px 10px;
+      border-left: 3px solid #ccc;
+      background: #f9f9f9;
+      border-radius: 4px;
+    }
+
 
     /* グリッドレイアウト */
     #results {
@@ -111,8 +122,10 @@
           <h3>${r["料理名(活用方法)"]}</h3>
           <p><b>食材:</b> ${r["使用したシネコ生産物"]}</p>
           <p><b>作成日:</b> ${new Date(r["作成日"]).toLocaleDateString()}</p>
+          ${r["備考1"] ? `<p class="note">📝 ${r["備考1"]}</p>` : ""}
           ${imagesHtml}
         `;
+
         resultsDiv.appendChild(div);
       });
     }
